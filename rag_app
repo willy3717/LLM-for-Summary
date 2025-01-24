@@ -1,0 +1,224 @@
+"""
+Sample code for RAG app
+"""
+
+import os
+import json
+
+import pprint
+import requests
+import streamlit as st
+import pandas as pd
+
+from src.configuration import load_configuration
+from src.search import search
+from src.search_ui import render_item
+from src.constants import LLM_AAS_ENDPOINT, LLM_AAS_TOKEN, DEFAULT_RAG_RETRIEVER_QUERY
+
+
+def llm_aas_get_models():
+    """
+    Retrieve the list of models available for LLM AAS
+
+    Returns:
+
+    """
+    # ------------------------------------------------------------------------------------------------------
+    # Authenticate in LLM AAS
+    # ------------------------------------------------------------------------------------------------------
+    response = requests.head(LLM_AAS_ENDPOINT, allow_redirects=True, verify=False, timeout=30)
+    url = response.url
+
+    # ------------------------------------------------------------------------------------------------------
+    # Calling LLM
+    # ------------------------------------------------------------------------------------------------------
+    # Defining headers with the API token
+    headers = {"X-Api-Key": LLM_AAS_TOKEN}  # Replace with your real API token
+
+    # Sending the POST request to the "chat/completions" endpoint
+    response2 = requests.get(f"{url}/v1/models", headers=headers, verify=False, timeout=120)
+
+    # Displaying the response
+    if response2.status_code == 200:
+        return [k["id"] for k in response2.json()["data"]]
+    raise ConnectionError(
+        f"### 😭 LLM AAS Connection Error 😭 \n"
+        f"ERROR[**{response2.status_code}**] \n"
+        f" ```json\n{pprint.pformat(json.loads(response2.text))}\n``` "
+    )
+
+
+def call_rag(llm_prompt: str, llm_name: str):
+    """
+    Perform a call to the RAG endpoint
+
+    Returns:
+
+    """
+    # ------------------------------------------------------------------------------------------------------
+    # Authenticate in LLM AAS
+    # ------------------------------------------------------------------------------------------------------
+    response = requests.head(LLM_AAS_ENDPOINT, allow_redirects=True, verify=False, timeout=30)
+    url = response.url
+
+    # ------------------------------------------------------------------------------------------------------
+    # Calling LLM
+    # ------------------------------------------------------------------------------------------------------
+    # Defining headers with the API token
+    headers = {"X-Api-Key": LLM_AAS_TOKEN}  # Replace with your real API token
+
+    # Payload of the request
+    payload = {"model": llm_name, "messages": [{"role": "user", "content": llm_prompt}], "temperature": 0}
+
+    # Sending the POST request to the "chat/completions" endpoint
+    response2 = requests.post(f"{url}/v1/chat/completions", json=payload, headers=headers, verify=False, timeout=120)
+
+    # Displaying the response
+    if response2.status_code == 200:
+        return response2.json()
+    raise ConnectionError(
+        f"### 😭 LLM AAS Connection Error 😭 \n"
+        f"ERROR[**{response2.status_code}**] \n\n"
+        f"You can try to :  \n"
+        f" - Change the Model\n"
+        f" - Retry later\n"
+        f" - Contact AIR Tech at DL RISK AIR TEAM <dl.risk_air_team@bnpparibas.com>\n\n"
+        f" ```json\n{pprint.pformat(json.loads(response2.text))}\n``` "
+    )
+
+
+def init_app(config):
+    """
+    Initialize the application
+
+    Returns:
+
+    """
+
+    # ------------------------------------------------------------------
+    # Initialization of the page
+    # ------------------------------------------------------------------
+    st.set_page_config(page_title=config.ui.title, page_icon="🔎", layout="wide")
+    st.html('<h3 class="primary py-0 my-0 text-right"><b>Ask (experimental)</b></h3>')
+
+    # Set initial Streamlit session states
+    if not st.session_state.get("st_selected_model"):
+        st.session_state["st_selected_model"] = config.rag.model
+
+    # Option to display model selector
+    with st.sidebar:
+        st.header("Parameters")
+
+        # Fill a select box with all models if options model_selector is enabled
+        if config.rag.model_selector:
+            st.selectbox(label="LLM", options=llm_aas_get_models(), key="st_selected_model")
+
+        # Optional select box for retriever query
+        if getattr(config.rag.retriever, "query_selector", None):
+
+            # Get the default query for retriever
+            default_query: str = getattr(config.rag.retriever, "query_id", DEFAULT_RAG_RETRIEVER_QUERY)
+
+            st.selectbox(
+                "Retriever",
+                options=config.rag.retriever.query_selector.values(),
+                index=list(config.rag.retriever.query_selector.values()).index(default_query),
+                key="query_id",
+            )
+
+    # Displaying logo
+    st.logo("static/img/airtech_logo.png")
+    if getattr(config, "dev_mode"):
+        st.info("This app is using the DEV Search API", icon="🚨")
+    st.balloons()
+
+    # CSS Overloading
+    with open("static/css/once-for-bootstrap.css", "r", encoding="utf8") as f:
+        css = f.read()
+    st.html(f'<style "display: none;">{css}</style>')
+
+    with open("static/css/app.css", "r", encoding="utf8") as f:
+        css = f.read()
+    st.html(f'<style "display: none;">{css}</style>')
+
+    with open("static/css/app_rag.css", "r", encoding="utf8") as f:
+        css = f.read()
+    st.html(f'<style "display: none;">{css}</style>')
+
+
+# =====================================================================================================================
+#  RUN THE RAG App
+# =====================================================================================================================
+# Loading Configuration
+config_obj = load_configuration(file_path=os.environ["SEARCH_CONFIG_PATH"])
+# config_obj.search.query_id = "search-risk-default-semantic"
+
+# Page initialization
+init_app(config_obj)
+
+# ------------------------------------------------------------------
+# Mock side bar values
+# ------------------------------------------------------------------
+SIZE = 1
+PAGE_NUMBER = 1
+QUESTION = "how to reduce ghg emissions"
+# ------------------------------------------------------------------
+# Search bar
+# ------------------------------------------------------------------
+question = st.text_input(
+    label="Ask your question", label_visibility="hidden", placeholder="Ask your question", key="in_question", value=None
+)
+
+# Response
+if question:
+    with st.spinner(text="Wait a minute, I am thinking ...."):
+        st.toast(f"Searching: {question}")
+        # Retriever - RSAP Semantic
+        df: pd.DataFrame = search(
+            text=question,
+            config=config_obj,
+            size=SIZE,
+            filters=None,
+            _from=(PAGE_NUMBER - 1) * SIZE,
+            query_id=st.session_state.get("query_id", DEFAULT_RAG_RETRIEVER_QUERY),
+        )
+
+        records = df.to_dict(orient="records")
+
+        # Create prompt on first element
+        prompt: str = f"""
+        Can you answer the following question based on this context ?
+        
+        CONTEXT:
+        
+        {records[0]["_source.content.0.text"]}
+        
+        
+        QUESTION:
+        
+        {question}
+        
+        If the answer is not available in the context, return the information is not available and do not invent things.
+        
+        
+        """
+        try:
+            rag_result = call_rag(llm_prompt=prompt, llm_name=st.session_state["st_selected_model"])
+        except ConnectionError as exc:
+            st.error(exc)
+        else:
+            rag_answer = rag_result["choices"][0]["message"]["content"]
+
+            # ----------------------------------------------
+            # UI presentation
+            # ----------------------------------------------
+            st.markdown("------")
+            st.markdown('<h5 class="primary pb-1">Answer</h5>', unsafe_allow_html=True)
+            st.html(f'<div class="px-4 mx-4">{rag_answer}</div>')
+
+            st.markdown("------")
+            st.markdown('<h5 class="info pb-1">Sources</h5>', unsafe_allow_html=True)
+
+            # Display Sources
+            for n_row, row in df.reset_index().iterrows():
+                render_item(config=config_obj, row=row)
