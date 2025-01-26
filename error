@@ -1,2 +1,7 @@
-WARNING: The script pdfplumber.exe is installed in 'C:\Users\h38354\AppData\Roaming\Python\Python311\Scripts' which is not on PATH.    
-  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+h38354@MADM01005588 MINGW64 //madfiler008/h38354$/DESKTOP/LLMproject
+$ python main.py
+Parsing the PDF...
+Asking the LLM...
+An error occurred: HTTPSConnectionPool(host='dmn-ap24182-prod-494cd687.datalab.cloud.echonet', port=443): Max retries exceeded with url: /u/903609/llmaas-02/app/v1/chat/completions (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1006)')))
+(venv) 
+h38354@MADM01005588 MINGW64 //madfiler008/h38354$/DESKTOP/LLMproject
