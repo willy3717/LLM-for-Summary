@@ -5,13 +5,11 @@ import pathlib
 import sys
 import os
 
-# Add the folder containing `rag_app` to the Python path
-main_project_folder = "path_to_main_project_folder"  # Replace with the path to your main project folder
-rag_app_folder = os.path.join(main_project_folder, "path_to_rag_folder")  # Replace with the folder containing `rag_app.py`
-
-if rag_app_folder not in sys.path:
-    sys.path.append(rag_app_folder)
+# Add the main project folder to Python's module search path
+main_project_folder = "path_to_main_project_folder"  # Replace with the absolute or relative path to your main project folder
+if main_project_folder not in sys.path:
+    sys.path.append(main_project_folder)
 
 # Import functions from parse_script and rag_app
-from parse_script import parse_page_v2, Granularity  # Assuming this file is in the same folder as the notebook
-from rag_app import call_rag  # Imported from the `rag_app` folder
+from parse_script import parse_page_v2, Granularity  # Assuming this file is in the project folder
+from rag_app import call_rag  # Assuming this file is also in the project folder or a subfolder
