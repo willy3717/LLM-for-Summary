@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+"""
+Example script demonstrating how to use parse_page_v2 to extract text from each page of a PDF.
+"""
+
+import pathlib
+import pdfplumber
+from typing import List
+
+# -------------------------------------------------------------------------
+# Hypothetical imports for 'Content', 'Granularity', and 'get_parent_func_name'
+# Adjust these imports to match your project’s actual modules
+# -------------------------------------------------------------------------
+# from your_project.content import Content
+# from your_project.enums import Granularity
+# from your_project.utils import get_parent_func_name
+
+# For the sake of this example, we'll define minimal stubs here:
+class Granularity:
+    PAGE = "PAGE"
+
+def get_parent_func_name():
+    return "parse_page_v2"
+
+class Content:
+    def __init__(self, text, page_number, granularity, item_number, vector, parser):
+        self.text = text
+        self.page_number = page_number
+        self.granularity = granularity
+        self.item_number = item_number
+        self.vector = vector
+        self.parser = parser
+
+# -------------------------------------------------------------------------
+# Original function
+# -------------------------------------------------------------------------
+def parse_page_v2(path: pathlib.Path, granularity: Granularity) -> List[Content]:
+    """
+    Parsing a docx by paragraph (despite the docstring, we are using pdfplumber).
+    
+    Args:
+        path (pathlib.Path): Path to the PDF file.
+        granularity (Granularity): The granularity setting (e.g. PAGE).
+    Returns:
+        List[Content]: A list of Content objects, one for each page in the PDF.
+    """
+    contents: List[Content] = []
+    with pdfplumber.open(str(path)) as pdf:
+        for page_number, page in enumerate(pdf.pages, start=1):
+            page_text = page.extract_text()
+            contents.append(
+                Content(
+                    text=page_text,
+                    page_number=page_number,
+                    granularity=granularity,
+                    item_number=page_number,
+                    vector=None,
+                    parser=get_parent_func_name()
+                )
+            )
+    return contents
+
+# -------------------------------------------------------------------------
+# Example usage
+# -------------------------------------------------------------------------
+def main():
+    # Adjust the path to point to some local PDF file
+    pdf_path = pathlib.Path("C:\\Users\\willy\\OneDrive\\Desktop\\LLMsumary\\pdf\\jackbeanstalk.pdf")
+
+    # Choose a granularity setting
+    granularity_setting = Granularity.PAGE
+
+    # Parse the PDF
+    pdf_contents = parse_page_v2(path=pdf_path, granularity=granularity_setting)
+
+    # Print results
+    print(f"Extracted {len(pdf_contents)} page(s) from: {pdf_path}")
+    if pdf_contents:
+        print("First page text:\n")
+        print(pdf_contents[0].text)
+    else:
+        print("No pages or text extracted.")
+
+# -------------------------------------------------------------------------
+if __name__ == "__main__":
+    main()
