@@ -1,0 +1,17 @@
+# Cell 1: Import Required Modules
+# --------------------------------
+# Import required modules for parsing and RAG
+import pathlib
+import sys
+import os
+
+# Add the folder containing `rag_app` to the Python path
+main_project_folder = "path_to_main_project_folder"  # Replace with the path to your main project folder
+rag_app_folder = os.path.join(main_project_folder, "path_to_rag_folder")  # Replace with the folder containing `rag_app.py`
+
+if rag_app_folder not in sys.path:
+    sys.path.append(rag_app_folder)
+
+# Import functions from parse_script and rag_app
+from parse_script import parse_page_v2, Granularity  # Assuming this file is in the same folder as the notebook
+from rag_app import call_rag  # Imported from the `rag_app` folder
