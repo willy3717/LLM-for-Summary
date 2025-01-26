@@ -1,0 +1,31 @@
+---------------------------------------------------------------------------
+KeyError                                  Traceback (most recent call last)
+Cell In[8], line 15
+     13 # Import functions from parse_script and rag_app
+     14 from parser import parse_page_v2, Granularity  # Assuming this file is in the project folder
+---> 15 from app_rag import call_rag  # Assuming this file is also in the project folder or a subfolder
+     17 # Set the LLM_AAS_TOKEN and LLM_AAS_ENDPOINT environment variables if required
+     18 import os
+
+File ~\Project\air_search_for_risk_ui_streamlit_srv\src\app\pages\app_rag.py:13
+     10 import streamlit as st
+     11 import pandas as pd
+---> 13 from src.configuration import load_configuration
+     14 from src.search import search
+     15 from src.search_ui import render_item
+
+File ~\Project\air_search_for_risk_ui_streamlit_srv\src\configuration.py:11
+      8 from yaml import safe_load
+      9 from pydantic import ValidationError
+---> 11 from src.models import Configuration
+     14 # ===========================================================================================
+     15 #  Functions
+     16 # ===========================================================================================
+     17 def load_configuration(file_path: Union[str, Path]) -> Configuration:
+...
+     27 LLM_AAS_TOKEN: str = os.environ["LLM_AAS_TOKEN"]
+
+File <frozen os>:679, in __getitem__(self, key)
+
+KeyError: 'LLM_AAS_ENDPOINT'
+Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
