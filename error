@@ -1,11 +1,13 @@
 ---------------------------------------------------------------------------
 KeyError                                  Traceback (most recent call last)
-Cell In[8], line 15
+Cell In[9], line 15
      13 # Import functions from parse_script and rag_app
      14 from parser import parse_page_v2, Granularity  # Assuming this file is in the project folder
 ---> 15 from app_rag import call_rag  # Assuming this file is also in the project folder or a subfolder
      17 # Set the LLM_AAS_TOKEN and LLM_AAS_ENDPOINT environment variables if required
-     18 import os
+     18 #import os
+     19 #os.environ["LLM_AAS_TOKEN"] = "sk-X3ExE6MaL-Risk-SearchDecision-dev"  # Replace with your actual LLM API token
+     20 #os.environ["LLM_AAS_ENDPOINT"] = "https://dmn-ap24182-prod-494cd687.datalab.cloud.echonet/u/903609/llmaas-02/app"  # Replace with your actual LLM endpoint
 
 File ~\Project\air_search_for_risk_ui_streamlit_srv\src\app\pages\app_rag.py:13
      10 import streamlit as st
@@ -22,10 +24,31 @@ File ~\Project\air_search_for_risk_ui_streamlit_srv\src\configuration.py:11
      15 #  Functions
      16 # ===========================================================================================
      17 def load_configuration(file_path: Union[str, Path]) -> Configuration:
-...
+
+File ~\Project\air_search_for_risk_ui_streamlit_srv\src\models.py:9
+      6 from typing import List, Optional, Dict
+      7 from pydantic import BaseModel, Field, field_validator, ConfigDict
+----> 9 from src.constants import CFG_RAG_MODELS, DEFAULT_RAG_RETRIEVER_QUERY
+     12 # ---------------------------------------------------------------------------
+     13 # Models
+     14 # ---------------------------------------------------------------------------
+     15 class _UiFilters(BaseModel):
+
+File ~\Project\air_search_for_risk_ui_streamlit_srv\src\constants.py:25
+     12 CFG_RAG_MODELS: List[str] = [
+     13     "mistral-large-2407",
+     14     "mistral-small-2407",
+   (...)
+     18     "Meta-Llama-31-70B-Instruct",
+     19 ]
+     21 # =====================================================================================================================
+     22 #   LLM Configuration
+     23 # =====================================================================================================================
+     24 # Endpoint to the LLM as a Service from ITG
+---> 25 LLM_AAS_ENDPOINT: str = os.environ["LLM_AAS_ENDPOINT"]
+     26 # Token for the LLM as a Service from ITG
      27 LLM_AAS_TOKEN: str = os.environ["LLM_AAS_TOKEN"]
 
 File <frozen os>:679, in __getitem__(self, key)
 
 KeyError: 'LLM_AAS_ENDPOINT'
-Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
