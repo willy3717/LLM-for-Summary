@@ -1,14 +1,59 @@
-Objet : Assistance pour la configuration d’un bucket S3 pour un tableau de bord Power BI
+import pathlib
+import pdfplumber
+from app_rag import call_rag  # Import the call_rag function from app_rag
 
-Bonjour Gioacchino,
+def parse_pdf(pdf_path):
+    """
+    Parse the PDF and return the content of the first page as text.
+    
+    Args:
+        pdf_path (str): Path to the PDF file.
+        
+    Returns:
+        str: Text content of the first page, or None if the PDF is empty.
+    """
+    with pdfplumber.open(pdf_path) as pdf:
+        if len(pdf.pages) == 0:
+            print("The PDF is empty.")
+            return None
+        # Extract text from the first page
+        first_page = pdf.pages[0]
+        return first_page.extract_text()
 
-David m’a donné votre contact et m’a conseillé de vous écrire afin de mettre en place un bucket S3 pour un tableau de bord Power BI que je dois mettre en production.
+def main():
+    # Path to the PDF file
+    pdf_path = "path_to_your_pdf.pdf"  # Replace with your PDF file path
+    
+    # Parse the PDF
+    print("Parsing the PDF...")
+    first_page_text = parse_pdf(pdf_path)
+    
+    if not first_page_text:
+        print("No content extracted from the PDF.")
+        return
+    
+    # Prepare the question and prompt
+    question = "What is the main topic of the document?"
+    prompt = f"""
+    Can you answer the following question based on this context?
 
-Pouvez-vous me confirmer si vous êtes en mesure de m’assister sur ce sujet ?
+    CONTEXT:
+    {first_page_text}
 
-Je vous remercie par avance pour votre aide et reste à votre disposition pour toute information complémentaire.
+    QUESTION:
+    {question}
 
-Bien cordialement,
-[Votre prénom et nom]
-[Votre poste]
-[Votre numéro de téléphone, si pertinent]
+    If the answer is not available in the context, return that the information is not available and do not invent things.
+    """
+
+    # Call the LLM using call_rag
+    try:
+        print("Sending request to the LLM...")
+        response = call_rag(prompt, llm_name="your_llm_model_name")  # Replace with your model name
+        print("LLM Response:")
+        print(response)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
