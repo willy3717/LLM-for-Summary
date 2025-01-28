@@ -1,13 +1,12 @@
-import pathlib
 import pdfplumber
 
 def parse_pdf(pdf_path):
     """
     Parse the PDF and return the content of the first page as text.
-    
+
     Args:
         pdf_path (str): Path to the PDF file.
-        
+
     Returns:
         str: Text content of the first page, or None if the PDF is empty.
     """
