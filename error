@@ -1,59 +1,15 @@
-import pathlib
-import pdfplumber
-from app_rag import call_rag  # Import the call_rag function from app_rag
-
-def parse_pdf(pdf_path):
-    """
-    Parse the PDF and return the content of the first page as text.
-    
-    Args:
-        pdf_path (str): Path to the PDF file.
-        
-    Returns:
-        str: Text content of the first page, or None if the PDF is empty.
-    """
-    with pdfplumber.open(pdf_path) as pdf:
-        if len(pdf.pages) == 0:
-            print("The PDF is empty.")
-            return None
-        # Extract text from the first page
-        first_page = pdf.pages[0]
-        return first_page.extract_text()
-
-def main():
-    # Path to the PDF file
-    pdf_path = "path_to_your_pdf.pdf"  # Replace with your PDF file path
-    
-    # Parse the PDF
-    print("Parsing the PDF...")
-    first_page_text = parse_pdf(pdf_path)
-    
-    if not first_page_text:
-        print("No content extracted from the PDF.")
-        return
-    
-    # Prepare the question and prompt
-    question = "What is the main topic of the document?"
-    prompt = f"""
-    Can you answer the following question based on this context?
-
-    CONTEXT:
-    {first_page_text}
-
-    QUESTION:
-    {question}
-
-    If the answer is not available in the context, return that the information is not available and do not invent things.
-    """
-
-    # Call the LLM using call_rag
-    try:
-        print("Sending request to the LLM...")
-        response = call_rag(prompt, llm_name="your_llm_model_name")  # Replace with your model name
-        print("LLM Response:")
-        print(response)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-if __name__ == "__main__":
-    main()
+(venv) PS Microsoft.PowerShell.Core\FileSystem::\\madfiler008\h38354$\DESKTOP\LLMproject> python main.py
+Parsing the PDF...
+Sending request to the LLM...
+\\madfiler008\h38354$\DESKTOP\LLMproject\venv\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'dmn-ap24182-prod-494cd687.datalab.cloud.echonet'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+\\madfiler008\h38354$\DESKTOP\LLMproject\venv\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'dmn-ap24182-prod-494cd687.datalab.cloud.echonet'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+\\madfiler008\h38354$\DESKTOP\LLMproject\venv\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'dmn-ap24182-prod-494cd687.datalab.cloud.echonet'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+LLM Response:
+{'id': 'chat-4bf1a5071aaf44dba8a47f6ea1a6307a', 'choices': [{'finish_reason': 'stop', 'index': 0, 'message': {'content': 
+' The main topic of the document is the fairy tale "Jack and the Beanstalk."', 'role': 'assistant', 'tool_calls': None, 'function_call': None}}], 'created': 1738071645, 'model': 'watsonx/mistralai/mistral-large', 'object': 'chat.completion', 
+'system_fingerprint': None, 'usage': {'completion_tokens': 20, 'prompt_tokens': 314, 'total_tokens': 334, 'completion_tokens_details': None, 'prompt_tokens_details': None}, 'service_tier': None, 'model_id': 'mistralai/mistral-large', 'created_at': '2025-01-28T13:40:45.722Z', 'system': {'warnings': [{'message': 'This model is a Non-IBM Product governed by a third-party license that may impose use restrictions and other obligations. By using this model you agree to its terms as identified in the following URL.', 'id': 'disclaimer_warning', 'more_info': 'https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=models-supported-foundation'}, {'message': "The value of 'max_tokens' for this model was set to value 1024", 
+'id': 'unspecified_max_token', 'additional_properties': {'limit': 0, 'new_value': 1024, 'parameter': 'max_tokens', 'value': 0}}]}}
+(venv) PS Microsoft.PowerShell.Core\FileSystem::\\madfiler008\h38354$\DESKTOP\LLMproject> 
